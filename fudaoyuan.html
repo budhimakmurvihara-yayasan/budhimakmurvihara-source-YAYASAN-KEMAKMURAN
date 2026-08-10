@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fu Dao Yuan — Yayasan Kemakmuran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#2B1A14; --paper:#F4EFE4; --paper-deep:#EAE0CC;
+    --maroon:#5C2323; --maroon-deep:#3E1616;
+    --gold:#B3823D; --gold-soft:#D9B77A;
+    --line:#CBBB98; --white-soft:#FBF7EE; --danger:#8A2E2E;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; min-height:100vh; }
+  header{ background:var(--maroon-deep); color:var(--white-soft); padding:18px 28px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  .brand{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:1.2rem; }
+  .brand span{ color:var(--gold-soft); font-family:'Inter',sans-serif; font-size:0.65rem; text-transform:uppercase; display:block; letter-spacing:0.1em; margin-top:2px; }
+  header .right{ display:flex; align-items:center; gap:18px; font-size:0.82rem; }
+  header a{ color:rgba(251,247,238,0.8); text-decoration:none; }
+  header a:hover{ color:var(--gold-soft); }
+  .role-badge{ background:var(--gold); color:var(--maroon-deep); font-size:0.65rem; text-transform:uppercase; padding:3px 10px; border-radius:10px; font-weight:600; }
+
+  #login-view{ max-width:400px; margin:100px auto; background:var(--white-soft); border:1px solid var(--line); border-radius:6px; padding:40px 32px; }
+  #login-view h1{ font-family:'Cormorant Garamond',serif; font-size:1.5rem; margin-bottom:8px; color:var(--maroon-deep); }
+  #login-view p.sub{ font-size:0.85rem; color:#7A6D57; margin-bottom:24px; }
+  label{ display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:#7A6D57; margin:14px 0 6px; }
+  label:first-of-type{ margin-top:0; }
+  input, textarea, select{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:4px; font-family:'Inter',sans-serif; font-size:0.9rem; background:#fff; color:var(--ink); }
+  textarea{ resize:vertical; min-height:60px; }
+  input:focus, textarea:focus, select:focus{ outline:none; border-color:var(--gold); }
+  .btn-primary{ width:100%; margin-top:22px; padding:11px; border:none; border-radius:3px; cursor:pointer; background:var(--maroon-deep); color:var(--white-soft); font-size:0.8rem; text-transform:uppercase; font-weight:500; }
+  .btn-primary:hover{ background:var(--gold); color:var(--maroon-deep); }
+  #error-msg{ color:var(--danger); font-size:0.82rem; margin-top:12px; display:none; }
+  .btn-small{ padding:7px 16px; border:1px solid rgba(251,247,238,0.4); border-radius:20px; font-size:0.75rem; cursor:pointer; background:transparent; color:var(--white-soft); }
+  .btn-small:hover{ border-color:var(--gold-soft); color:var(--gold-soft); }
+
+  #app-view{ display:none; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:32px 24px 80px; }
+
+  .tabs{ display:flex; gap:6px; margin-bottom:26px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tab-btn{ padding:12px 18px; font-size:0.85rem; background:none; border:none; cursor:pointer; color:#7A6D57; border-bottom:2px solid transparent; font-family:'Inter',sans-serif; }
+  .tab-btn.active{ color:var(--maroon-deep); border-color:var(--gold); font-weight:600; }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .panel-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+  .panel-head h2{ font-family:'Cormorant Garamond',serif; font-size:1.4rem; color:var(--maroon-deep); }
+  .btn{ padding:9px 18px; border-radius:3px; font-size:0.78rem; text-transform:uppercase; cursor:pointer; font-weight:500; border:1px solid var(--maroon-deep); background:var(--maroon-deep); color:var(--white-soft); }
+  .btn:hover{ background:var(--gold); border-color:var(--gold); color:var(--maroon-deep); }
+  .btn-outline{ background:transparent; color:var(--maroon-deep); }
+  .btn-outline:hover{ background:var(--maroon-deep); color:var(--white-soft); }
+
+  .card-list{ display:flex; flex-direction:column; gap:12px; }
+  .item-card{ background:var(--white-soft); border:1px solid var(--line); border-radius:6px; padding:18px 20px; }
+  .item-card .top-row{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .item-card .date-badge{ font-size:0.7rem; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:6px; display:block; }
+  .program-badge{ display:inline-block; font-size:0.65rem; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold); border-radius:20px; padding:2px 10px; margin-left:8px; font-family:'Inter',sans-serif; font-weight:600; }
+  .item-card h3{ font-family:'Cormorant Garamond',serif; font-size:1.15rem; color:var(--maroon-deep); margin-bottom:6px; }
+  .item-card .meta{ font-size:0.82rem; color:#5A4A40; line-height:1.6; }
+  .item-card .meta b{ color:var(--maroon-deep); }
+  .item-actions{ display:flex; gap:10px; flex-shrink:0; }
+  .icon-btn{ background:none; border:none; cursor:pointer; font-size:0.75rem; color:#7A6D57; text-transform:uppercase; }
+  .icon-btn:hover{ color:var(--maroon-deep); }
+  .icon-btn.danger:hover{ color:var(--danger); }
+  .empty-note{ color:#8A7F63; font-style:italic; font-size:0.88rem; padding:20px 0; }
+
+  .tipe-filter{ display:flex; gap:8px; margin-bottom:16px; }
+  .stats-row{ display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap; }
+  .stat-box{ background:var(--white-soft); border:1px solid var(--line); border-radius:6px; padding:16px 26px; display:flex; flex-direction:column; align-items:center; min-width:100px; }
+  .stat-num{ font-family:'Cormorant Garamond',serif; font-size:1.9rem; font-weight:600; color:var(--maroon-deep); line-height:1; }
+  .stat-label{ font-size:0.68rem; text-transform:uppercase; color:var(--gold); margin-top:6px; letter-spacing:0.06em; }
+  .tipe-filter button{ padding:6px 16px; border-radius:16px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:0.78rem; }
+  .tipe-filter button.active{ background:var(--maroon-deep); color:var(--white-soft); border-color:var(--maroon-deep); }
+
+  .history-item{ border-left:2px solid var(--gold); padding-left:18px; margin-bottom:22px; position:relative; }
+  .history-item::before{ content:''; position:absolute; left:-6px; top:4px; width:10px; height:10px; border-radius:50%; background:var(--gold); }
+  .history-date{ font-size:0.72rem; text-transform:uppercase; color:var(--gold); font-weight:600; }
+  .history-filter-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .filter-chip{ padding:7px 16px; border-radius:16px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:0.78rem; font-family:'Inter',sans-serif; color:var(--ink); }
+  .filter-chip.active{ background:var(--maroon-deep); color:var(--white-soft); border-color:var(--maroon-deep); }
+  .filter-chip:hover:not(.active){ border-color:var(--gold); color:var(--gold); }
+  .history-item h3{ font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--maroon-deep); margin:4px 0 6px; }
+  .history-item p{ font-size:0.85rem; color:#5A4A40; margin-bottom:4px; }
+
+  #modal-overlay{ display:none; position:fixed; inset:0; background:rgba(43,26,20,0.55); z-index:500; align-items:flex-start; justify-content:center; padding:60px 20px; overflow-y:auto; }
+  #modal-overlay.open{ display:flex; }
+  #modal-box{ background:var(--paper); border-radius:8px; max-width:560px; width:100%; padding:30px 32px; }
+  #modal-box h2{ font-family:'Cormorant Garamond',serif; font-size:1.3rem; color:var(--maroon-deep); margin-bottom:20px; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:12px; margin-top:22px; }
+  .btn-cancel{ padding:10px 20px; border:1px solid var(--line); border-radius:3px; background:transparent; cursor:pointer; font-size:0.8rem; text-transform:uppercase; }
+  .btn-cancel:hover{ border-color:var(--maroon-deep); }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+  @media (max-width:700px){ .row2{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div id="login-view">
+  <h1>Masuk — Program Fu Dao Yuan</h1>
+  <p class="sub">Gunakan akun admin atau akun pengurus.</p>
+  <form id="login-form">
+    <label for="email">Email</label>
+    <input type="email" id="email" required autocomplete="username">
+    <label for="password">Password</label>
+    <input type="password" id="password" required autocomplete="current-password">
+    <button type="submit" class="btn-primary">Masuk</button>
+    <p id="error-msg"></p>
+  </form>
+</div>
+
+<div id="app-view">
+  <header>
+    <div class="brand">Fu Dao Yuan<span>Yayasan Kemakmuran</span></div>
+    <div class="right">
+      <span id="user-info"></span>
+      <a href="index.html">Beranda</a>
+      <button class="btn-small" id="logout-btn">Keluar</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pengumuman">Pengumuman</button>
+      <button class="tab-btn" data-tab="jadwal">Jadwal Kegiatan</button>
+      <button class="tab-btn" data-tab="laporan">Laporan Kegiatan</button>
+      <button class="tab-btn" data-tab="orang">Data Anggota</button>
+      <button class="tab-btn" data-tab="history">History Kegiatan</button>
+    </div>
+
+    <!-- PENGUMUMAN -->
+    <div class="tab-panel active" id="panel-pengumuman">
+      <div class="panel-head">
+        <h2>Pengumuman</h2>
+        <button class="btn" id="btn-tambah-pengumuman" style="display:none;" onclick="openAnnouncementModal()">+ Tambah Pengumuman</button>
+      </div>
+      <div class="card-list" id="announcement-list"></div>
+    </div>
+
+    <!-- JADWAL -->
+    <div class="tab-panel" id="panel-jadwal">
+      <div class="panel-head">
+        <h2>Jadwal Kegiatan</h2>
+        <button class="btn" id="btn-atur-program" style="display:none; background:transparent; color:var(--maroon-deep); margin-right:8px;" onclick="openProgramSettingsModal()">⚙️ Atur Program</button>
+        <button class="btn" id="btn-atur-grup-wa" style="display:none; background:transparent; color:var(--maroon-deep); margin-right:8px;" onclick="openGroupWaSettingModal()">⚙️ Atur Link Grup WA</button>
+        <button class="btn" onclick="openScheduleModal()">+ Tambah Jadwal</button>
+      </div>
+      <div class="card-list" id="schedule-list"></div>
+    </div>
+
+    <!-- LAPORAN -->
+    <div class="tab-panel" id="panel-laporan">
+      <div class="panel-head">
+        <h2>Laporan Kegiatan</h2>
+        <button class="btn" onclick="openReportModal()">+ Tambah Laporan</button>
+      </div>
+      <div class="card-list" id="report-list"></div>
+    </div>
+
+    <!-- ORANG -->
+    <div class="tab-panel" id="panel-orang">
+      <div class="panel-head">
+        <h2>Data Anggota</h2>
+        <button class="btn" onclick="openPersonModal()">+ Tambah Data</button>
+      </div>
+      <div class="card-list" id="people-list"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="tab-panel" id="panel-history">
+      <div class="panel-head">
+        <h2>History Kegiatan</h2>
+      </div>
+      <p style="font-size:0.85rem; color:#7A6D57; margin-bottom:20px;">Gabungan otomatis dari Jadwal & Laporan, diurutkan dari yang terbaru.</p>
+      <div id="history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h2 id="modal-title"></h2>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn" id="modal-save-btn">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://tgpabahjuwdcorltmhll.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRncGFiYWhqdXdkY29ybHRtaGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMjQ5MDYsImV4cCI6MjEwMDkwMDkwNn0.woeNJzLhtIsCiArlAZVK6fRRwmEhpJMls20eyfNHJsc';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let scheduleData = [];
+  let reportData = [];
+  let peopleData = [];
+  let announcementData = [];
+  let currentPeopleFilter = 'semua';
+  let currentRole = null;
+  let groupWaLink = '';
+  let programsData = [];
+
+  // ---------- Auth ----------
+  async function checkSession(){
+    const { data:{ session } } = await sb.auth.getSession();
+    if (session) await showApp(session.user);
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorMsg = document.getElementById('error-msg');
+    errorMsg.style.display = 'none';
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      errorMsg.textContent = 'Login gagal: ' + error.message;
+      errorMsg.style.display = 'block';
+      return;
+    }
+    await showApp(data.user);
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    location.reload();
+  });
+
+  async function showApp(user){
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('app-view').style.display = 'block';
+
+    let roleLabel = '';
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    currentRole = profile ? profile.role : null;
+    if (currentRole === 'admin') roleLabel = '<span class="role-badge">Admin</span>';
+    else if (currentRole === 'user') roleLabel = '<span class="role-badge">Pengurus</span>';
+
+    document.getElementById('user-info').innerHTML = `${user.email} ${roleLabel}`;
+    document.getElementById('btn-tambah-pengumuman').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
+    document.getElementById('btn-atur-grup-wa').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
+    document.getElementById('btn-atur-program').style.display = currentRole === 'admin' ? 'inline-block' : 'none';
+
+    await loadGroupWaLink();
+    await loadPrograms();
+    await loadPeople();
+    await loadSchedule();
+    await Promise.all([loadAnnouncements(), loadReports()]);
+    renderHistory();
+  }
+
+  // =====================================================
+  // PENGATURAN: Link Grup WhatsApp
+  // =====================================================
+  async function loadGroupWaLink(){
+    const { data, error } = await sb.from('fdy_settings').select('value').eq('key', 'wa_group_link').maybeSingle();
+    if (error){ console.error(error); return; }
+    groupWaLink = (data && data.value) || '';
+  }
+
+  function openGroupWaSettingModal(){
+    document.getElementById('modal-title').textContent = 'Atur Link Grup WhatsApp';
+    document.getElementById('modal-body').innerHTML = `
+      <label>Link Grup WhatsApp Pengurus</label>
+      <input id="grup-wa-link" placeholder="https://chat.whatsapp.com/xxxxxxxx" value="${escapeHtml(groupWaLink)}">
+      <p style="font-size:0.75rem; color:#8A7F63; margin-top:8px; font-style:italic;">
+        Buka grup WA di HP → Info Grup → Bagikan Link Grup → salin link-nya ke sini.<br>
+        Karena WhatsApp tidak mengizinkan pesan otomatis terisi langsung ke grup, tombol "Kirim ke Grup WA" nanti akan menyalin teks ke clipboard lalu membuka grup ini — tinggal tempel (Ctrl+V / tahan lalu Tempel) dan kirim.
+      </p>
+    `;
+    document.getElementById('modal-save-btn').onclick = saveGroupWaLink;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  async function saveGroupWaLink(){
+    const value = document.getElementById('grup-wa-link').value.trim();
+    const { error } = await sb.from('fdy_settings').upsert({ key: 'wa_group_link', value }, { onConflict: 'key' });
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+    groupWaLink = value;
+    closeModal();
+    renderScheduleList();
+    renderAnnouncementList();
+  }
+
+  // =====================================================
+  // PENGATURAN: Daftar Program Fu Dao Yuan
+  // =====================================================
+  async function loadPrograms(){
+    const { data, error } = await sb.from('fdy_programs').select('*').order('nama');
+    if (error){ console.error(error); return; }
+    programsData = data || [];
+  }
+
+  function programOptions(selectedId){
+    let opts = `<option value="">— Belum ditentukan —</option>`;
+    const inputProgs = programsData.filter(p => p.tipe !== 'output');
+    const outputProgs = programsData.filter(p => p.tipe === 'output');
+    if (inputProgs.length){
+      opts += `<optgroup label="Input — Minggu ke-2">`;
+      opts += inputProgs.map(p => `<option value="${p.id}" ${selectedId == p.id ? 'selected' : ''}>${escapeHtml(p.nama)}</option>`).join('');
+      opts += `</optgroup>`;
+    }
+    if (outputProgs.length){
+      opts += `<optgroup label="Output — Minggu ke-4">`;
+      opts += outputProgs.map(p => `<option value="${p.id}" ${selectedId == p.id ? 'selected' : ''}>${escapeHtml(p.nama)}</option>`).join('');
+      opts += `</optgroup>`;
+    }
+    return opts;
+  }
+
+  // Hitung ini "minggu ke berapa" dalam bulan (berdasarkan urutan hari yang sama, misal Minggu ke-2 = Sabtu ke-2 di bulan itu)
+  function getWeekOfMonth(dateStr){
+    if (!dateStr) return null;
+    const d = new Date(dateStr + 'T00:00:00');
+    return Math.ceil(d.getDate() / 7);
+  }
+
+  function scheduleDateHint(dateStr){
+    const hintEl = document.getElementById('sch-date-hint');
+    if (!hintEl) return;
+    const week = getWeekOfMonth(dateStr);
+    if (!week){ hintEl.textContent = ''; return; }
+    if (week === 2){
+      hintEl.textContent = '📅 Ini Minggu ke-2 di bulan ini — cocok untuk program Input.';
+      hintEl.style.color = 'var(--gold)';
+    } else if (week === 4){
+      hintEl.textContent = '📅 Ini Minggu ke-4 di bulan ini — cocok untuk program Output.';
+      hintEl.style.color = 'var(--gold)';
+    } else {
+      hintEl.textContent = `⚠️ Ini Minggu ke-${week} di bulan ini — Fu Dao Yuan biasanya cuma jalan Minggu ke-2 & ke-4.`;
+      hintEl.style.color = '#8A2E2E';
+    }
+  }
+
+  function openProgramSettingsModal(){
+    document.getElementById('modal-title').textContent = 'Atur Program Fu Dao Yuan';
+    renderProgramSettingsBody();
+    const saveBtn = document.getElementById('modal-save-btn');
+    saveBtn.textContent = 'Selesai';
+    saveBtn.onclick = closeModal;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function renderProgramSettingsBody(){
+    document.getElementById('modal-body').innerHTML = `
+      <label>Tambah Program Baru</label>
+      <div style="display:flex; gap:8px;">
+        <input id="new-program-name" placeholder="Nama program" style="flex:1;">
+        <select id="new-program-tipe" style="max-width:150px;">
+          <option value="input">Input (Mgu-2)</option>
+          <option value="output">Output (Mgu-4)</option>
+        </select>
+        <button type="button" class="btn-save" style="white-space:nowrap; padding:0 18px;" onclick="addProgram()">+ Tambah</button>
+      </div>
+      <div class="modal-subhead">Daftar Program</div>
+      <div id="program-list-editor">
+        ${programsData.length ? programsData.map(p => `
+          <div class="list-item" style="display:flex; align-items:center; gap:10px;">
+            <input id="prog-name-${p.id}" value="${(p.nama||'').replace(/"/g,'&quot;')}" style="flex:1; margin:0;">
+            <select id="prog-tipe-${p.id}" style="max-width:150px; margin:0;">
+              <option value="input" ${p.tipe !== 'output' ? 'selected' : ''}>Input (Mgu-2)</option>
+              <option value="output" ${p.tipe === 'output' ? 'selected' : ''}>Output (Mgu-4)</option>
+            </select>
+            <button type="button" class="btn-cancel" style="padding:9px 14px; white-space:nowrap;" onclick="renameProgram(${p.id})">Simpan</button>
+            <button type="button" class="btn-remove" onclick="deleteProgram(${p.id})">✕ Hapus</button>
+          </div>
+        `).join('') : '<p class="empty-note">Belum ada program.</p>'}
+      </div>
+    `;
+  }
+
+  async function addProgram(){
+    const nameInput = document.getElementById('new-program-name');
+    const nama = nameInput.value.trim();
+    const tipe = document.getElementById('new-program-tipe').value;
+    if (!nama){ alert('Nama program tidak boleh kosong.'); return; }
+    const { error } = await sb.from('fdy_programs').insert({ nama, tipe });
+    if (error){ alert('Gagal menambah program: ' + error.message); return; }
+    await loadPrograms();
+    renderProgramSettingsBody();
+    renderScheduleList();
+  }
+
+  async function renameProgram(id){
+    const val = document.getElementById(`prog-name-${id}`).value.trim();
+    const tipe = document.getElementById(`prog-tipe-${id}`).value;
+    if (!val){ alert('Nama program tidak boleh kosong.'); return; }
+    const { error } = await sb.from('fdy_programs').update({ nama: val, tipe }).eq('id', id);
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+    await loadPrograms();
+    renderProgramSettingsBody();
+    renderScheduleList();
+  }
+
+  async function deleteProgram(id){
+    if (!confirm('Hapus program ini? Jadwal yang sudah memakai program ini akan jadi "Belum ditentukan".')) return;
+    const { error } = await sb.from('fdy_programs').delete().eq('id', id);
+    if (error){ alert('Gagal menghapus: ' + error.message); return; }
+    await loadPrograms();
+    renderProgramSettingsBody();
+    renderScheduleList();
+  }
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str||''; return d.innerHTML; }
+  function fmtDate(dateStr){
+    if (!dateStr) return '-';
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+  }
+
+  // =====================================================
+  // PENGUMUMAN
+  // =====================================================
+  async function loadAnnouncements(){
+    const { data, error } = await sb.from('fdy_announcements').select('*').order('created_at', { ascending:false });
+    if (error){ console.error(error); return; }
+    announcementData = data || [];
+    renderAnnouncementList();
+  }
+
+  function renderAnnouncementList(){
+    const container = document.getElementById('announcement-list');
+    if (!announcementData.length){
+      container.innerHTML = '<p class="empty-note">Belum ada pengumuman.</p>';
+      return;
+    }
+    const isAdmin = currentRole === 'admin';
+    container.innerHTML = announcementData.map(item => `
+      <div class="item-card">
+        <div class="top-row">
+          <div>
+            <span class="date-badge">${fmtDate(item.created_at ? item.created_at.slice(0,10) : '')}</span>
+            <h3>${escapeHtml(item.judul)}</h3>
+            <div class="meta" style="white-space:pre-line;">${escapeHtml(item.isi)}</div>
+            <a href="#" onclick="copyAndOpenGroup(${JSON.stringify(`*${item.judul}*\n\n${item.isi}`).replace(/"/g, '&quot;')}); return false;" style="display:inline-flex; align-items:center; gap:5px; margin-top:10px; font-size:0.78rem; color:#3DA855; font-weight:500; text-decoration:none;">
+              👥 Kirim ke Grup WA
+            </a>
+          </div>
+          ${isAdmin ? `
+          <div class="item-actions">
+            <button class="icon-btn" onclick="openAnnouncementModal(${item.id})">Edit</button>
+            <button class="icon-btn danger" onclick="deleteAnnouncement(${item.id})">Hapus</button>
+          </div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openAnnouncementModal(id){
+    const item = id ? announcementData.find(a => a.id === id) : null;
+    document.getElementById('modal-title').textContent = id ? 'Edit Pengumuman' : 'Tambah Pengumuman';
+    document.getElementById('modal-body').innerHTML = `
+      <label>Judul</label>
+      <input id="ann-judul" value="${escapeHtml(item ? item.judul : '')}">
+      <label>Isi Pengumuman</label>
+      <textarea id="ann-isi" style="min-height:120px;">${escapeHtml(item ? item.isi : '')}</textarea>
+    `;
+    document.getElementById('modal-save-btn').onclick = () => saveAnnouncement(id);
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  async function saveAnnouncement(id){
+    const payload = {
+      judul: document.getElementById('ann-judul').value,
+      isi: document.getElementById('ann-isi').value,
+    };
+    if (!payload.judul || !payload.isi){ alert('Judul dan isi wajib diisi.'); return; }
+
+    let error;
+    if (id){
+      ({ error } = await sb.from('fdy_announcements').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', id));
+    } else {
+      ({ error } = await sb.from('fdy_announcements').insert(payload));
+    }
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+    closeModal();
+    await loadAnnouncements();
+  }
+
+  async function deleteAnnouncement(id){
+    if (!confirm('Hapus pengumuman ini?')) return;
+    const { error } = await sb.from('fdy_announcements').delete().eq('id', id);
+    if (error){ alert('Gagal menghapus: ' + error.message); return; }
+    await loadAnnouncements();
+  }
+
+  // =====================================================
+  // JADWAL KEGIATAN
+  // =====================================================
+  async function loadSchedule(){
+    const { data, error } = await sb.from('fdy_schedule').select('*').order('tanggal', { ascending:false });
+    if (error){ console.error(error); return; }
+    scheduleData = data || [];
+    renderScheduleList();
+  }
+
+  function personName(id){
+    if (!id) return '-';
+    const p = peopleData.find(p => p.id === id);
+    return p ? p.nama : '-';
+  }
+
+  function personNames(ids){
+    if (!ids || !ids.length) return '-';
+    return ids.map(id => personName(id)).join(', ');
+  }
+
+  function checkboxOptions(name, selectedIds){
+    const anggotaList = peopleData.filter(p => p.tipe === 'fdy');
+    if (!anggotaList.length) return '<p style="font-size:0.82rem; color:#8A7F63;">Belum ada data anggota.</p>';
+    const sel = selectedIds || [];
+    return `<div style="border:1px solid var(--line); border-radius:4px; padding:10px 12px; max-height:160px; overflow-y:auto; background:#fff;">
+      ${anggotaList.map(p => `
+        <label style="display:flex; align-items:center; gap:8px; font-size:0.88rem; text-transform:none; letter-spacing:0; color:var(--ink); margin:6px 0; font-weight:400;">
+          <input type="checkbox" name="${name}" value="${p.id}" ${sel.includes(p.id) ? 'checked' : ''} style="width:auto;">
+          ${escapeHtml(p.nama)}${p.email ? '' : ' (belum ada email)'}
+        </label>
+      `).join('')}
+    </div>`;
+  }
+
+  function pengurusOptions(selectedId){
+    const anggotaList = peopleData.filter(p => p.tipe === 'fdy');
+    let opts = `<option value="">— Belum ditentukan —</option>`;
+    opts += anggotaList.map(p => `<option value="${p.id}" ${selectedId==p.id?'selected':''}>${escapeHtml(p.nama)}${p.email ? '' : ' (belum ada email)'}</option>`).join('');
+    return opts;
+  }
+
+
+  function personObj(id){
+    if (!id) return null;
+    return peopleData.find(p => p.id === id) || null;
+  }
+
+  function formatPhoneWA(phone){
+    if (!phone) return '';
+    let p = phone.replace(/[^0-9]/g, '');
+    if (p.startsWith('0')) p = '62' + p.slice(1);
+    else if (!p.startsWith('62')) p = '62' + p;
+    return p;
+  }
+
+  function buildScheduleSummaryText(item){
+    return [
+      `*Jadwal Kegiatan Fu Dao Yuan*`,
+      `📅 ${fmtDate(item.tanggal)}${item.jam_mulai ? ' pukul ' + item.jam_mulai.slice(0,5) : ''}`,
+      `📖 Tema: ${item.tema_materi || '-'}`,
+      item.aktivitas_tambahan ? `✨ Aktivitas tambahan: ${item.aktivitas_tambahan}` : '',
+      ``,
+      `*Petugas:*`,
+      `• Pemateri: ${personName(item.pemateri_id)}`,
+      `• MC: ${personName(item.mc_id)}`,
+      `• Persembahan Buah: ${personNames(item.buah_ids)}`,
+    ].filter(Boolean).join('\n');
+  }
+
+  function buildPersonTaskText(item, role, personNama){
+    return [
+      `Halo ${personNama} 🙏`,
+      ``,
+      `Kamu bertugas sebagai *${role}* pada kegiatan Fu Dao Yuan:`,
+      ``,
+      `📅 ${fmtDate(item.tanggal)}${item.jam_mulai ? ' pukul ' + item.jam_mulai.slice(0,5) : ''}`,
+      `📖 Tema: ${item.tema_materi || '-'}`,
+      item.aktivitas_tambahan ? `✨ Aktivitas tambahan: ${item.aktivitas_tambahan}` : '',
+      ``,
+      `Mohon konfirmasi kehadirannya ya. Terima kasih 🙏`,
+    ].filter(Boolean).join('\n');
+  }
+
+  function buildWaLink(phone, message){
+    const num = formatPhoneWA(phone);
+    const text = encodeURIComponent(message);
+    return num ? `https://wa.me/${num}?text=${text}` : `https://wa.me/?text=${text}`;
+  }
+
+  async function copyAndOpenGroup(text){
+    if (!groupWaLink){
+      alert('Link grup WA belum diatur. Klik "⚙️ Atur Link Grup WA" dulu (khusus admin).');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Teks sudah disalin! Setelah grup terbuka, tempel (Ctrl+V) lalu kirim.');
+    } catch(e){
+      alert('Gagal menyalin otomatis, silakan salin teks ini secara manual:\n\n' + text);
+    }
+    window.open(groupWaLink, '_blank');
+  }
+
+  function waButtonHtml(person, item, role){
+    if (!person) return '';
+    const hasPhone = person.kontak && person.kontak.trim() !== '';
+    const link = buildWaLink(person.kontak, buildPersonTaskText(item, role, person.nama));
+    return `<a href="${link}" target="_blank" rel="noopener" class="icon-btn" style="color:#3DA855;" title="${hasPhone ? 'Kirim tugas ke ' + escapeHtml(person.nama) : 'Nomor belum diisi — pilih kontak manual'}">💬 ${escapeHtml(person.nama)}</a>`;
+  }
+
+
+  function renderScheduleList(){
+    const container = document.getElementById('schedule-list');
+    if (!scheduleData.length){ container.innerHTML = '<p class="empty-note">Belum ada jadwal. Klik "+ Tambah Jadwal" untuk mulai.</p>'; return; }
+    container.innerHTML = scheduleData.map(item => `
+      <div class="item-card">
+        <div class="top-row">
+          <div>
+            <span class="date-badge">${fmtDate(item.tanggal)}${item.jam_mulai ? ' &middot; ' + item.jam_mulai.slice(0,5) : ''}</span>
+            ${item.program_id ? `<span class="program-badge">${escapeHtml((programsData.find(p => p.id === item.program_id) || {}).nama || '')}</span>` : ''}
+            <h3>${escapeHtml(item.tema_materi || '(Tanpa tema)')}</h3>
+            <div class="meta">
+              ${item.aktivitas_tambahan ? `<div><b>Aktivitas tambahan:</b> ${escapeHtml(item.aktivitas_tambahan)}</div>` : ''}
+              <div><b>Pemateri:</b> ${escapeHtml(personName(item.pemateri_id))} &nbsp;|&nbsp; <b>MC:</b> ${escapeHtml(personName(item.mc_id))}</div>
+              <div><b>Persembahan Buah:</b> ${escapeHtml(personNames(item.buah_ids))}</div>
+            </div>
+            <div style="margin-top:10px;">
+              <a href="#" onclick="copyAndOpenGroup(buildScheduleSummaryText(scheduleData.find(s => s.id === ${item.id}))); return false;" style="display:inline-flex; align-items:center; gap:5px; font-size:0.78rem; color:#3DA855; font-weight:500; text-decoration:none;">
+                👥 Kirim ke Grup WA
+              </a>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="icon-btn" onclick="openScheduleModal(${item.id})">Edit</button>
+            <button class="icon-btn danger" onclick="deleteSchedule(${item.id})">Hapus</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openScheduleModal(id){
+    const item = id ? scheduleData.find(s => s.id === id) : null;
+    document.getElementById('modal-title').textContent = id ? 'Edit Jadwal' : 'Tambah Jadwal';
+    document.getElementById('modal-body').innerHTML = `
+      <label>Program</label>
+      <select id="sch-program">${programOptions(item ? item.program_id : null)}</select>
+      <div class="row2">
+        <div>
+          <label>Tanggal</label>
+          <input type="date" id="sch-tanggal" value="${item ? item.tanggal : ''}" onchange="scheduleDateHint(this.value)" oninput="scheduleDateHint(this.value)">
+          <p id="sch-date-hint" style="font-size:0.75rem; margin-top:6px; min-height:1.1em;"></p>
+        </div>
+        <div><label>Jam Mulai</label><input type="time" id="sch-jam-mulai" value="${item && item.jam_mulai ? item.jam_mulai.slice(0,5) : ''}"></div>
+      </div>
+      <label>Tema Materi</label>
+      <input id="sch-tema" value="${escapeHtml(item ? item.tema_materi : '')}">
+      <label>Aktivitas Tambahan</label>
+      <textarea id="sch-aktivitas">${escapeHtml(item ? item.aktivitas_tambahan : '')}</textarea>
+      <div class="row2">
+        <div><label>Pemateri</label><select id="sch-pemateri">${pengurusOptions(item ? item.pemateri_id : null)}</select></div>
+        <div><label>MC</label><select id="sch-mc">${pengurusOptions(item ? item.mc_id : null)}</select></div>
+      </div>
+      <label>Persembahan Buah (bisa pilih lebih dari 1 orang)</label>
+      ${checkboxOptions('sch-buah', item ? item.buah_ids : [])}
+      <p style="font-size:0.72rem; color:#8A7F63; margin-top:10px; font-style:italic;">Anggota belum muncul di daftar? Tambahkan dulu lewat tab "Data Anggota", lengkap dengan emailnya. Belum ada pilihan Program? Klik "⚙️ Atur Program" (khusus admin).</p>
+    `;
+    if (item && item.tanggal) scheduleDateHint(item.tanggal);
+    document.getElementById('modal-save-btn').onclick = () => saveSchedule(id);
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  async function saveSchedule(id){
+    const payload = {
+      program_id: document.getElementById('sch-program').value || null,
+      tanggal: document.getElementById('sch-tanggal').value,
+      jam_mulai: document.getElementById('sch-jam-mulai').value || null,
+      tema_materi: document.getElementById('sch-tema').value,
+      aktivitas_tambahan: document.getElementById('sch-aktivitas').value,
+      pemateri_id: document.getElementById('sch-pemateri').value || null,
+      mc_id: document.getElementById('sch-mc').value || null,
+      buah_ids: Array.from(document.querySelectorAll('input[name="sch-buah"]:checked')).map(el => parseInt(el.value)),
+    };
+    if (!payload.tanggal){ alert('Tanggal wajib diisi.'); return; }
+
+    let error;
+    if (id){
+      ({ error } = await sb.from('fdy_schedule').update(payload).eq('id', id));
+    } else {
+      ({ error } = await sb.from('fdy_schedule').insert(payload));
+    }
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+    closeModal();
+    await loadSchedule();
+    renderHistory();
+  }
+
+  async function deleteSchedule(id){
+    if (!confirm('Hapus jadwal ini?')) return;
+    const { error } = await sb.from('fdy_schedule').delete().eq('id', id);
+    if (error){ alert('Gagal menghapus: ' + error.message); return; }
+    await loadSchedule();
+    renderHistory();
+  }
+
+  // =====================================================
+  // LAPORAN KEGIATAN
+  // =====================================================
+  async function loadReports(){
+    const { data, error } = await sb.from('fdy_reports').select('*').order('tanggal', { ascending:false });
+    if (error){ console.error(error); return; }
+    reportData = data || [];
+    renderReportList();
+  }
+
+  function renderReportList(){
+    const container = document.getElementById('report-list');
+    if (!reportData.length){ container.innerHTML = '<p class="empty-note">Belum ada laporan. Klik "+ Tambah Laporan" untuk mulai.</p>'; return; }
+    container.innerHTML = reportData.map(item => {
+      const sched = scheduleData.find(s => s.id === item.schedule_id);
+      return `
+      <div class="item-card">
+        <div class="top-row">
+          <div>
+            <span class="date-badge">${fmtDate(item.tanggal)}</span>
+            <h3>${sched ? escapeHtml(sched.tema_materi || '(Tanpa tema)') : '(Jadwal tidak ditemukan)'}</h3>
+            <div class="meta">
+              <div><b>Kehadiran:</b> ${item.kehadiran_pengurus ?? 0} Pengurus &middot; ${item.kehadiran_murid ?? 0} Murid</div>
+              <div>${item.catatan ? escapeHtml(item.catatan) : '<i>Tidak ada catatan.</i>'}</div>
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="icon-btn" onclick="openReportModal(${item.id})">Edit</button>
+            <button class="icon-btn danger" onclick="deleteReport(${item.id})">Hapus</button>
+          </div>
+        </div>
+      </div>
+    `;
+    }).join('');
+  }
+
+  function openReportModal(id){
+    const item = id ? reportData.find(r => r.id === id) : null;
+    const reportedScheduleIds = new Set(reportData.filter(r => r.id !== id).map(r => r.schedule_id).filter(Boolean));
+    const availableSchedules = scheduleData.filter(s => !reportedScheduleIds.has(s.id));
+
+    const optionsHtml = availableSchedules.length
+      ? availableSchedules.map(s => `<option value="${s.id}" ${item && item.schedule_id === s.id ? 'selected' : ''}>${fmtDate(s.tanggal)} — ${escapeHtml(s.tema_materi || '(Tanpa tema)')}</option>`).join('')
+      : '<option value="">— Tidak ada jadwal tersedia —</option>';
+
+    document.getElementById('modal-title').textContent = id ? 'Edit Laporan' : 'Tambah Laporan';
+    document.getElementById('modal-body').innerHTML = `
+      <label>Pilih Jadwal</label>
+      <select id="rep-schedule">${optionsHtml}</select>
+      ${!availableSchedules.length ? '<p style="font-size:0.75rem; color:#8A7F63; font-style:italic; margin-top:6px;">Semua jadwal sudah punya laporan, atau memang belum ada jadwal. Tambahkan dulu di tab "Jadwal Kegiatan".</p>' : ''}
+      <div class="row2">
+        <div><label>Kehadiran Pengurus</label><input type="number" min="0" id="rep-pengurus" value="${item ? item.kehadiran_pengurus : ''}"></div>
+        <div><label>Kehadiran Murid</label><input type="number" min="0" id="rep-murid" value="${item ? item.kehadiran_murid : ''}"></div>
+      </div>
+      <label>Catatan Singkat</label>
+      <textarea id="rep-catatan">${escapeHtml(item ? item.catatan : '')}</textarea>
+    `;
+    document.getElementById('modal-save-btn').onclick = () => saveReport(id);
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  async function saveReport(id){
+    const scheduleId = parseInt(document.getElementById('rep-schedule').value);
+    if (!scheduleId){ alert('Pilih jadwal terlebih dahulu.'); return; }
+    const schedule = scheduleData.find(s => s.id === scheduleId);
+
+    const payload = {
+      schedule_id: scheduleId,
+      tanggal: schedule.tanggal,
+      kehadiran_pengurus: parseInt(document.getElementById('rep-pengurus').value) || 0,
+      kehadiran_murid: parseInt(document.getElementById('rep-murid').value) || 0,
+      catatan: document.getElementById('rep-catatan').value,
+    };
+
+    let error;
+    if (id){
+      ({ error } = await sb.from('fdy_reports').update(payload).eq('id', id));
+    } else {
+      ({ error } = await sb.from('fdy_reports').insert(payload));
+    }
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+    closeModal();
+    await loadReports();
+    renderHistory();
+  }
+
+  async function deleteReport(id){
+    if (!confirm('Hapus laporan ini?')) return;
+    const { error } = await sb.from('fdy_reports').delete().eq('id', id);
+    if (error){ alert('Gagal menghapus: ' + error.message); return; }
+    await loadReports();
+    renderHistory();
+  }
+
+  // =====================================================
+  // DATA MURID & PENGURUS
+  // =====================================================
+  async function loadPeople(){
+    const { data, error } = await sb.from('yayasan_people').select('*').order('nama', { ascending:true });
+    if (error){ console.error(error); return; }
+    peopleData = data || [];
+    renderPeopleList();
+  }
+
+  function tipeLabel(tipe){
+    if (tipe === 'fdy') return 'FDY';
+    if (tipe === 'murid') return 'Murid';
+    return 'Pengurus';
+  }
+
+  function renderStatsCard(){
+    const jumlahFdy = peopleData.filter(p => p.tipe === 'fdy').length;
+    const jumlahMurid = peopleData.filter(p => p.tipe === 'murid').length;
+    const jumlahPengurus = peopleData.filter(p => p.tipe === 'pengurus' || !p.tipe).length;
+    return `
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-num">${jumlahFdy}</span><span class="stat-label">FDY</span></div>
+        <div class="stat-box"><span class="stat-num">${jumlahMurid}</span><span class="stat-label">Murid</span></div>
+        <div class="stat-box"><span class="stat-num">${jumlahPengurus}</span><span class="stat-label">Pengurus</span></div>
+      </div>
+    `;
+  }
+
+  function renderPeopleList(){
+    const container = document.getElementById('people-list');
+    const statsHtml = renderStatsCard();
+    if (!peopleData.length){ container.innerHTML = statsHtml + '<p class="empty-note">Belum ada data. Klik "+ Tambah Data" untuk mulai.</p>'; return; }
+    container.innerHTML = statsHtml + peopleData.map(item => `
+      <div class="item-card">
+        <div class="top-row">
+          <div>
+            <span class="date-badge">${tipeLabel(item.tipe)}</span>
+            <h3>${escapeHtml(item.nama)}</h3>
+            <div class="meta">
+              ${item.detail ? `<div><b>Peran/Jabatan:</b> ${escapeHtml(item.detail)}</div>` : ''}
+              ${item.kontak ? `<div><b>Kontak:</b> ${escapeHtml(item.kontak)}</div>` : ''}
+              ${item.alamat ? `<div><b>Alamat:</b> ${escapeHtml(item.alamat)}</div>` : ''}
+              ${item.catatan ? `<div><b>Catatan:</b> ${escapeHtml(item.catatan)}</div>` : ''}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="icon-btn" onclick="openPersonModal(${item.id})">Edit</button>
+            <button class="icon-btn danger" onclick="deletePerson(${item.id})">Hapus</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function openPersonModal(id){
+    const item = id ? peopleData.find(p => p.id === id) : null;
+    document.getElementById('modal-title').textContent = id ? 'Edit Data' : 'Tambah Data';
+    document.getElementById('modal-body').innerHTML = `
+      <label>Tipe</label>
+      <select id="per-tipe">
+        <option value="fdy" ${!item || item.tipe==='fdy' ? 'selected':''}>FDY (Anggota Fu Dao Yuan)</option>
+        <option value="pengurus" ${item && item.tipe==='pengurus' ? 'selected':''}>Pengurus</option>
+        <option value="murid" ${item && item.tipe==='murid' ? 'selected':''}>Murid</option>
+      </select>
+      <label>Nama Lengkap</label>
+      <input id="per-nama" value="${escapeHtml(item ? item.nama : '')}">
+      <label>Peran/Jabatan</label>
+      <input id="per-detail" value="${escapeHtml(item ? item.detail : '')}">
+      <div class="row2">
+        <div><label>Email <span style="font-weight:400; normal-case; text-transform:none;">(dipakai untuk kalender & pengingat)</span></label><input type="email" id="per-email" value="${escapeHtml(item ? item.email : '')}"></div>
+        <div><label>Kontak (No. HP)</label><input id="per-kontak" value="${escapeHtml(item ? item.kontak : '')}"></div>
+      </div>
+      <label>Alamat</label>
+      <input id="per-alamat" value="${escapeHtml(item ? item.alamat : '')}">
+      <label>Catatan</label>
+      <textarea id="per-catatan">${escapeHtml(item ? item.catatan : '')}</textarea>
+    `;
+    document.getElementById('modal-save-btn').onclick = () => savePerson(id);
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  async function savePerson(id){
+    const payload = {
+      nama: document.getElementById('per-nama').value,
+      tipe: document.getElementById('per-tipe').value,
+      detail: document.getElementById('per-detail').value,
+      email: document.getElementById('per-email').value,
+      kontak: document.getElementById('per-kontak').value,
+      alamat: document.getElementById('per-alamat').value,
+      catatan: document.getElementById('per-catatan').value,
+    };
+    if (!payload.nama){ alert('Nama wajib diisi.'); return; }
+    if (!payload.email){
+      if (!confirm('Email belum diisi. Tanpa email, anggota ini tidak akan bisa menerima pengingat jadwal otomatis. Lanjutkan tanpa email?')) return;
+    }
+
+    let error;
+    if (id){
+      ({ error } = await sb.from('yayasan_people').update(payload).eq('id', id));
+    } else {
+      ({ error } = await sb.from('yayasan_people').insert(payload));
+    }
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+    closeModal();
+    await loadPeople();
+  }
+
+  async function deletePerson(id){
+    if (!confirm('Hapus data ini?')) return;
+    const { error } = await sb.from('yayasan_people').delete().eq('id', id);
+    if (error){ alert('Gagal menghapus: ' + error.message); return; }
+    await loadPeople();
+  }
+
+  // =====================================================
+  // HISTORY (gabungan otomatis jadwal + laporan)
+  // =====================================================
+  const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  let selectedHistoryYear = null;
+  let selectedHistoryMonth = null;
+
+  function selectHistoryYear(y){
+    selectedHistoryYear = y;
+    selectedHistoryMonth = null;
+    renderHistory();
+  }
+  function selectHistoryMonth(m){
+    selectedHistoryMonth = m;
+    renderHistory();
+  }
+
+  function renderHistory(){
+    const combined = {};
+    scheduleData.forEach(s => {
+      combined[s.tanggal] = combined[s.tanggal] || {};
+      combined[s.tanggal].jadwal = s;
+    });
+    reportData.forEach(r => {
+      combined[r.tanggal] = combined[r.tanggal] || {};
+      combined[r.tanggal].laporan = r;
+    });
+
+    const allDates = Object.keys(combined);
+    const container = document.getElementById('history-list');
+    if (!allDates.length){ container.innerHTML = '<p class="empty-note">Belum ada history. Isi Jadwal atau Laporan terlebih dahulu.</p>'; return; }
+
+    const years = [...new Set(allDates.map(d => d.slice(0,4)))].sort((a,b) => b.localeCompare(a));
+    if (!selectedHistoryYear || !years.includes(selectedHistoryYear)) selectedHistoryYear = years[0];
+
+    const monthsInYear = [...new Set(allDates.filter(d => d.startsWith(selectedHistoryYear)).map(d => parseInt(d.slice(5,7))))].sort((a,b) => a - b);
+
+    let html = `<div class="history-filter-row">` +
+      years.map(y => `<button class="filter-chip ${y === selectedHistoryYear ? 'active' : ''}" onclick="selectHistoryYear('${y}')">${y}</button>`).join('') +
+      `</div>`;
+
+    html += `<div class="history-filter-row">` +
+      `<button class="filter-chip ${selectedHistoryMonth === null ? 'active' : ''}" onclick="selectHistoryMonth(null)">Semua Bulan</button>` +
+      monthsInYear.map(m => `<button class="filter-chip ${selectedHistoryMonth === m ? 'active' : ''}" onclick="selectHistoryMonth(${m})">${MONTH_NAMES[m-1]}</button>`).join('') +
+      `</div>`;
+
+    const filteredDates = allDates.filter(d => {
+      if (!d.startsWith(selectedHistoryYear)) return false;
+      if (selectedHistoryMonth && parseInt(d.slice(5,7)) !== selectedHistoryMonth) return false;
+      return true;
+    }).sort((a,b) => new Date(b) - new Date(a));
+
+    if (!filteredDates.length){
+      html += '<p class="empty-note">Tidak ada kegiatan pada periode ini.</p>';
+      container.innerHTML = html;
+      return;
+    }
+
+    html += filteredDates.map(date => {
+      const entry = combined[date];
+      const j = entry.jadwal;
+      const r = entry.laporan;
+      return `
+        <div class="history-item">
+          <span class="history-date">${fmtDate(date)}</span>
+          <h3>${j ? escapeHtml(j.tema_materi || '(Tanpa tema)') : '(Tidak ada jadwal tercatat)'}</h3>
+          ${j ? `<p><b>Pemateri:</b> ${escapeHtml(personName(j.pemateri_id))} &nbsp;|&nbsp; <b>MC:</b> ${escapeHtml(personName(j.mc_id))} &nbsp;|&nbsp; <b>Persembahan Buah:</b> ${escapeHtml(personNames(j.buah_ids))}</p>` : ''}
+          ${r ? `<p><b>Kehadiran:</b> ${r.kehadiran_pengurus ?? 0} pengurus, ${r.kehadiran_murid ?? 0} murid</p>` : ''}
+          ${r && r.catatan ? `<p><b>Catatan:</b> ${escapeHtml(r.catatan)}</p>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = html;
+  }
+
+
+  function closeModal(){
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('modal-save-btn').textContent = 'Simpan';
+  }
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModal();
+  });
+
+  checkSession();
+</script>
+
+</body>
+</html>

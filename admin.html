@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — Yayasan Kemakmuran</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Literata:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #2B1A14; --paper: #F4EFE4; --paper-deep: #EAE0CC;
+    --maroon: #5C2323; --maroon-deep: #3E1616;
+    --gold: #B3823D; --gold-soft: #D9B77A;
+    --line: #CBBB98; --white-soft: #FBF7EE;
+    --danger:#8A2E2E;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ background:var(--paper); color:var(--ink); font-family:'Literata', serif; line-height:1.6; }
+  h1,h2,h3{ font-family:'Cormorant Garamond', serif; font-weight:600; }
+  .eyebrow, .utility, .btn, .tag { font-family:'Inter',sans-serif; letter-spacing:0.06em; }
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- Admin-only topbar ---------- */
+  #admin-topbar{
+    position:sticky; top:0; z-index:200; background:var(--maroon-deep); color:var(--white-soft);
+    padding:14px 28px; display:flex; justify-content:space-between; align-items:center;
+    font-family:'Inter',sans-serif; font-size:0.85rem;
+  }
+  #admin-topbar b{ color:var(--gold-soft); }
+  #admin-topbar .right{ display:flex; gap:20px; align-items:center; }
+  #admin-topbar a{ opacity:0.85; }
+  #admin-topbar a:hover{ opacity:1; color:var(--gold-soft); }
+  .btn-small{
+    padding:7px 16px; border:1px solid rgba(251,247,238,0.4); border-radius:20px; font-size:0.75rem;
+    cursor:pointer; background:transparent; color:var(--white-soft);
+  }
+  .btn-small:hover{ border-color:var(--gold-soft); color:var(--gold-soft); }
+
+  /* ---------- Login ---------- */
+  #login-view{ max-width:400px; margin:100px auto; background:var(--white-soft); border:1px solid var(--line); border-radius:6px; padding:40px 32px; font-family:'Inter',sans-serif; }
+  #login-view h1{ font-size:1.6rem; margin-bottom:8px; color:var(--maroon-deep); }
+  #login-view p.sub{ font-size:0.85rem; color:#7A6D57; margin-bottom:26px; }
+  #login-view label{ display:block; font-size:0.75rem; text-transform:uppercase; color:#7A6D57; margin:16px 0 6px; }
+  #login-view input{ width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:4px; font-family:'Inter',sans-serif; font-size:0.92rem; }
+  #login-view input:focus{ outline:none; border-color:var(--gold); }
+  .btn-primary{
+    width:100%; margin-top:24px; padding:11px; border:none; border-radius:3px; cursor:pointer;
+    background:var(--maroon-deep); color:var(--white-soft); font-family:'Inter',sans-serif;
+    font-size:0.8rem; text-transform:uppercase; font-weight:500;
+  }
+  .btn-primary:hover{ background:var(--gold); color:var(--maroon-deep); }
+  #error-msg{ color:var(--danger); font-size:0.82rem; margin-top:14px; display:none; }
+
+  /* ---------- Editable section wrapper + Edit button ---------- */
+  .editable{ position:relative; }
+  .edit-btn{
+    position:absolute; top:18px; right:28px; z-index:20;
+    display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:20px;
+    font-size:0.72rem; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif;
+    background:var(--white-soft); border:1px solid var(--gold); color:var(--maroon-deep);
+    transition:.2s;
+  }
+  .edit-btn:hover{ background:var(--gold); color:var(--white-soft); }
+  .edit-btn svg{ width:13px; height:13px; }
+  .edit-btn.on-dark{ background:rgba(251,247,238,0.12); border-color:var(--gold-soft); color:var(--white-soft); }
+  .edit-btn.on-dark:hover{ background:var(--gold-soft); color:var(--maroon-deep); }
+  .static-note{
+    position:absolute; top:18px; right:28px; font-family:'Inter',sans-serif; font-size:0.68rem;
+    color:#8A7F63; font-style:italic;
+  }
+
+  /* ---------- Site look (copied from public site) ---------- */
+  .motif-bg{
+    position:absolute; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23B3823D' stroke-width='0.6' opacity='0.35'%3E%3Ccircle cx='48' cy='48' r='30'/%3E%3Ccircle cx='48' cy='48' r='4'/%3E%3Cpath d='M48 18 L48 78 M18 48 L78 48 M26 26 L70 70 M70 26 L26 70'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:96px 96px; pointer-events:none;
+  }
+  .brandbar{ background:var(--white-soft); border-bottom:1px solid var(--line); padding:16px 28px; display:flex; align-items:center; gap:12px; }
+  .brand-mark{ width:32px; height:32px; }
+  .brand-name{ font-family:'Cormorant Garamond', serif; font-weight:600; font-size:1.2rem; color:var(--maroon-deep); }
+  .brand-sub{ font-family:'Inter',sans-serif; font-size:0.6rem; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold); }
+
+  .hero{ position:relative; background:linear-gradient(180deg, var(--maroon-deep) 0%, var(--maroon) 100%); color:var(--white-soft); padding:90px 28px 100px; overflow:hidden; }
+  .hero .motif-bg{ opacity:0.5; }
+  .hero-inner{ position:relative; z-index:2; max-width:820px; margin:0 auto; text-align:center; }
+  .hero-eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:0.7rem; text-transform:uppercase; color:var(--gold-soft); margin-bottom:22px; font-family:'Inter',sans-serif; }
+  .hero-eyebrow::before, .hero-eyebrow::after{ content:''; width:24px; height:1px; background:var(--gold-soft); }
+  .hero h1{ font-size:clamp(2rem, 4.5vw, 3.2rem); line-height:1.18; color:var(--white-soft); margin-bottom:20px; }
+  .hero h1 em{ font-style:italic; color:var(--gold-soft); }
+  .hero p.lead{ font-size:1rem; color:rgba(251,247,238,0.82); max-width:520px; margin:0 auto; }
+
+  section{ padding:70px 28px; position:relative; }
+  .section-inner{ max-width:1100px; margin:0 auto; }
+  .eyebrow{ font-size:0.7rem; text-transform:uppercase; color:var(--gold); margin-bottom:12px; display:block; }
+  h2.section-title{ font-size:clamp(1.6rem, 3vw, 2.1rem); color:var(--maroon-deep); margin-bottom:16px; max-width:640px; }
+  .section-desc{ max-width:600px; color:#4A3A32; font-size:0.95rem; }
+
+  .about-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:start; margin-top:36px; }
+  .about-copy p{ margin-bottom:14px; color:#3B2A22; font-size:0.95rem; }
+  .legal-box{ background:var(--white-soft); border:1px solid var(--line); border-radius:4px; padding:22px 24px; }
+
+  .pengurus-grid{ margin-top:32px; display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .pengurus-card{ background:var(--white-soft); border:1px solid var(--line); border-radius:4px; padding:22px 24px; }
+  .pengurus-card h3{ font-family:'Cormorant Garamond',serif; font-size:1.1rem; color:var(--maroon-deep); margin-bottom:14px; }
+  .pengurus-row{ display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); font-family:'Inter',sans-serif; font-size:0.85rem; }
+  .pengurus-row:last-child{ border-bottom:none; }
+  .pengurus-jabatan{ color:#7A6D57; }
+  .pengurus-nama{ color:var(--maroon-deep); font-weight:500; text-align:right; }
+  @media (max-width:860px){ .pengurus-grid{ grid-template-columns:1fr; } }
+  .legal-box .utility{ font-size:0.66rem; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:10px; }
+  .legal-box dl{ display:grid; grid-template-columns:auto 1fr; gap:7px 16px; font-family:'Inter',sans-serif; font-size:0.82rem; }
+  .legal-box dt{ color:#7A6D57; }
+  .legal-box dd{ color:var(--maroon-deep); font-weight:500; }
+
+  .pilar-section{ background:var(--maroon-deep); color:var(--white-soft); }
+  .pilar-section .eyebrow{ color:var(--gold-soft); }
+  .pilar-section h2.section-title{ color:var(--white-soft); }
+  .pilar-section .section-desc{ color:rgba(251,247,238,0.72); }
+  .pilar-row{ margin-top:36px; display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-top:1px solid rgba(217,183,122,0.35); }
+  .pilar{ padding:26px 18px; border-right:1px solid rgba(217,183,122,0.35); }
+  .pilar:last-child{ border-right:none; }
+  .pilar-pali{ font-family:'Cormorant Garamond', serif; font-style:italic; font-size:1.3rem; color:var(--gold-soft); margin-bottom:10px; }
+  .pilar-name{ font-size:0.68rem; text-transform:uppercase; color:var(--gold-soft); margin-bottom:8px; font-family:'Inter',sans-serif; }
+  .pilar h3{ font-size:1.1rem; margin-bottom:8px; color:var(--white-soft); }
+  .pilar p{ font-size:0.82rem; color:rgba(251,247,238,0.68); font-family:'Inter',sans-serif; line-height:1.5; }
+
+  .program-grid{ margin-top:36px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .program-card{ background:var(--white-soft); border:1px solid var(--line); border-radius:4px; padding:24px; }
+  .program-card .tag{ display:inline-block; font-size:0.62rem; text-transform:uppercase; color:var(--gold); border:1px solid var(--gold); border-radius:20px; padding:3px 11px; margin-bottom:12px; }
+  .program-card h3{ font-size:1.1rem; color:var(--maroon-deep); margin-bottom:8px; }
+  .program-card p{ font-size:0.88rem; color:#5A4A40; }
+
+  .gallery-grid{ margin-top:36px; display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .gallery-tile{ aspect-ratio:1; border-radius:4px; background:linear-gradient(135deg, var(--paper-deep), var(--white-soft)); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; position:relative; }
+  .gallery-tile svg{ width:34%; opacity:0.5; }
+  .gallery-tile span{ position:absolute; bottom:8px; left:10px; font-family:'Inter',sans-serif; font-size:0.6rem; text-transform:uppercase; color:#8A7F63; }
+
+  .donasi-section{ background:var(--paper-deep); }
+  .donasi-grid{ margin-top:36px; display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+  .donasi-card{ background:var(--white-soft); border:1px solid var(--line); border-radius:4px; padding:26px; }
+  .donasi-card h3{ font-size:1.05rem; color:var(--maroon-deep); margin-bottom:12px; }
+  .donasi-card ul{ list-style:none; font-family:'Inter',sans-serif; font-size:0.86rem; color:#4A3A32; }
+  .donasi-card li{ padding:8px 0; border-bottom:1px dashed var(--line); display:flex; justify-content:space-between; }
+  .donasi-card li:last-child{ border-bottom:none; }
+  .donasi-card .cara{ display:block; padding:10px 0; border-bottom:1px dashed var(--line); }
+  .donasi-card .cara:last-child{ border-bottom:none; }
+  .donasi-card .cara b{ color:var(--maroon-deep); display:block; margin-bottom:2px; }
+
+  footer{ background:var(--maroon-deep); color:rgba(251,247,238,0.85); padding:60px 28px 32px; }
+  .footer-grid{ max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:36px; padding-bottom:32px; border-bottom:1px solid rgba(217,183,122,0.25); }
+  .footer-col h4{ font-family:'Inter',sans-serif; font-size:0.68rem; text-transform:uppercase; color:var(--gold-soft); margin-bottom:12px; }
+  .footer-col p, .footer-col a{ font-family:'Inter',sans-serif; font-size:0.85rem; display:block; margin-bottom:8px; color:rgba(251,247,238,0.78); }
+  .footer-bottom{ max-width:1100px; margin:0 auto; padding-top:20px; font-family:'Inter',sans-serif; font-size:0.72rem; color:rgba(251,247,238,0.5); }
+
+  @media (max-width:860px){
+    .about-grid, .program-grid, .donasi-grid{ grid-template-columns:1fr; }
+    .pilar-row{ grid-template-columns:repeat(2,1fr); }
+    .gallery-grid{ grid-template-columns:repeat(2,1fr); }
+    .footer-grid{ grid-template-columns:1fr; gap:24px; }
+    .edit-btn, .static-note{ position:static; display:inline-flex; margin-bottom:14px; }
+  }
+
+  /* ---------- Modal ---------- */
+  #modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(43,26,20,0.55); z-index:500;
+    align-items:flex-start; justify-content:center; padding:60px 20px; overflow-y:auto;
+  }
+  #modal-overlay.open{ display:flex; }
+  #modal-box{
+    background:var(--paper); border-radius:8px; max-width:640px; width:100%; padding:32px 34px 34px;
+    font-family:'Inter',sans-serif;
+  }
+  #modal-box h2{ font-size:1.4rem; color:var(--maroon-deep); margin-bottom:22px; }
+  #modal-body label{ display:block; font-size:0.72rem; text-transform:uppercase; color:#7A6D57; margin:16px 0 6px; letter-spacing:0.05em; }
+  #modal-body label:first-child{ margin-top:0; }
+  #modal-body input, #modal-body textarea{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:4px;
+    font-family:'Inter',sans-serif; font-size:0.9rem; background:#fff; color:var(--ink);
+  }
+  #modal-body textarea{ min-height:70px; resize:vertical; }
+  #modal-body input:focus, #modal-body textarea:focus{ outline:none; border-color:var(--gold); }
+  .modal-subhead{ font-family:'Cormorant Garamond',serif; font-size:1.05rem; color:var(--maroon-deep); margin-top:24px; padding-top:16px; border-top:1px solid var(--line); }
+  .list-item{ border:1px dashed var(--line); border-radius:4px; padding:14px 16px; margin-top:14px; }
+  .list-item-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .list-item-label{ font-size:0.68rem; text-transform:uppercase; color:var(--gold); }
+  .btn-remove{ background:none; border:none; color:var(--danger); font-size:0.72rem; cursor:pointer; text-transform:uppercase; font-family:'Inter',sans-serif; }
+  .btn-remove:hover{ text-decoration:underline; }
+  .btn-add{
+    display:block; width:100%; margin-top:16px; padding:11px; border:1.5px dashed var(--gold);
+    border-radius:4px; background:transparent; color:var(--maroon-deep); cursor:pointer;
+    font-family:'Inter',sans-serif; font-size:0.8rem; text-transform:uppercase; font-weight:500;
+  }
+  .btn-add:hover{ background:var(--gold); color:var(--white-soft); border-style:solid; }
+  .list-item-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; }
+  .btn-remove{ background:none; border:none; color:var(--danger); font-size:0.7rem; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; }
+  .btn-remove:hover{ text-decoration:underline; }
+  .btn-add-item{
+    display:inline-flex; align-items:center; gap:6px; margin-top:16px; padding:9px 18px;
+    border:1px dashed var(--gold); border-radius:20px; background:transparent; color:var(--maroon-deep);
+    cursor:pointer; font-size:0.78rem; text-transform:uppercase; font-family:'Inter',sans-serif;
+  }
+  .btn-add-item:hover{ background:var(--gold); color:var(--white-soft); border-style:solid; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:12px; margin-top:26px; }
+  .btn-cancel{ padding:10px 20px; border:1px solid var(--line); border-radius:3px; background:transparent; cursor:pointer; font-size:0.8rem; text-transform:uppercase; color:var(--ink); }
+  .btn-cancel:hover{ border-color:var(--maroon-deep); }
+  .btn-save{ padding:10px 22px; border:none; border-radius:3px; background:var(--maroon-deep); color:var(--white-soft); cursor:pointer; font-size:0.8rem; text-transform:uppercase; font-weight:500; }
+  .btn-save:hover{ background:var(--gold); color:var(--maroon-deep); }
+  .save-msg{ font-size:0.78rem; color:var(--gold); margin-right:auto; align-self:center; opacity:0; transition:opacity .3s; }
+  .save-msg.show{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div id="login-view">
+  <h1>Masuk sebagai Admin</h1>
+  <p class="sub">Gunakan akun admin yang sudah dibuat di Supabase.</p>
+  <form id="login-form">
+    <label for="email">Email</label>
+    <input type="email" id="email" required autocomplete="username">
+    <label for="password">Password</label>
+    <input type="password" id="password" required autocomplete="current-password">
+    <button type="submit" class="btn-primary">Masuk</button>
+    <p id="error-msg"></p>
+  </form>
+</div>
+
+<div id="site-view" style="display:none;">
+
+  <div id="admin-topbar">
+    <div>Masuk sebagai <b id="admin-email"></b></div>
+    <div class="right">
+      <a href="index.html" target="_blank">Lihat situs asli ↗</a>
+      <button class="btn-small" id="logout-btn">Keluar</button>
+    </div>
+  </div>
+
+  <div class="brandbar editable" style="position:relative;">
+    <button class="edit-btn" style="top:50%; transform:translateY(-50%); right:28px;" onclick="openLogoModal()">✎ Edit Logo</button>
+    <svg class="brand-mark" id="brand-logo-icon" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4"/>
+      <circle cx="20" cy="20" r="2.4" fill="#B3823D"/>
+      <path d="M20 6 L20 34 M6 20 L34 20 M10.4 10.4 L29.6 29.6 M29.6 10.4 L10.4 29.6" stroke="#B3823D" stroke-width="1.1"/>
+    </svg>
+    <img class="brand-mark" id="brand-logo-img" style="display:none; object-fit:contain; border-radius:4px;" alt="Logo">
+    <div>
+      <div class="brand-name">Yayasan Kemakmuran</div>
+      <div class="brand-sub" id="nav-tagline-preview">Menebar Dharma &middot; Memupuk Kebajikan</div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero editable">
+    <div class="motif-bg"></div>
+    <button class="edit-btn on-dark" onclick="openEditModal('hero')">✎ Edit Hero</button>
+    <div class="hero-inner">
+      <div class="hero-eyebrow" data-preview="hero.eyebrow"></div>
+      <h1 id="hero-title-preview"></h1>
+      <p class="lead" data-preview="hero.lead"></p>
+    </div>
+  </section>
+
+  <!-- TENTANG -->
+  <section class="editable">
+    <button class="edit-btn" onclick="openEditModal('about')">✎ Edit Tentang Kami</button>
+    <div class="section-inner">
+      <span class="eyebrow">Tentang Kami</span>
+      <h2 class="section-title">Berdiri di atas niat baik, berjalan dengan Dharma</h2>
+      <div class="about-grid">
+        <div class="about-copy">
+          <p data-preview="about.paragraph1"></p>
+          <p data-preview="about.paragraph2"></p>
+          <p><em data-preview="about.paragraph3"></em></p>
+        </div>
+        <div class="legal-box">
+          <span class="utility">Legalitas Yayasan</span>
+          <dl>
+            <dt>Nama</dt><dd>Yayasan Kemakmuran</dd>
+            <dt>Akta Notaris</dt><dd data-preview="about.legal_akta"></dd>
+            <dt>SK Kemenkumham</dt><dd data-preview="about.legal_sk"></dd>
+            <dt>NPWP Yayasan</dt><dd data-preview="about.legal_npwp"></dd>
+            <dt>Alamat</dt><dd data-preview="about.legal_alamat"></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUSUNAN PENGURUS -->
+  <section class="editable">
+    <button class="edit-btn" onclick="openPengurusModal()">✎ Edit Susunan Pengurus</button>
+    <div class="section-inner">
+      <span class="eyebrow">Struktur Organisasi</span>
+      <h2 class="section-title">Susunan Pengurus</h2>
+      <div class="pengurus-grid" id="pengurus-grid-preview"></div>
+    </div>
+  </section>
+
+  <!-- PILAR (tetap, tidak diedit dari sini) -->
+  <section class="pilar-section">
+    <div class="static-note">Konten tetap — belum dapat diedit dari sini</div>
+    <div class="section-inner">
+      <span class="eyebrow">Empat Sifat Luhur</span>
+      <h2 class="section-title">Brahmavihara — landasan setiap program kami</h2>
+      <div class="pilar-row">
+        <div class="pilar"><div class="pilar-pali">Metta</div><div class="pilar-name">Cinta Kasih</div><h3>Menebar Metta</h3><p>Menumbuhkan cinta kasih tanpa syarat kepada semua makhluk.</p></div>
+        <div class="pilar"><div class="pilar-pali">Karuna</div><div class="pilar-name">Welas Asih</div><h3>Mengamalkan Karuna</h3><p>Peduli pada penderitaan sesama dan bertindak nyata.</p></div>
+        <div class="pilar"><div class="pilar-pali">Mudita</div><div class="pilar-name">Rasa Simpati</div><h3>Merayakan Mudita</h3><p>Turut berbahagia atas kebaikan orang lain.</p></div>
+        <div class="pilar"><div class="pilar-pali">Upekkha</div><div class="pilar-name">Keseimbangan</div><h3>Menjaga Upekkha</h3><p>Melatih batin yang seimbang dan tenang.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section class="editable">
+    <button class="edit-btn" onclick="openEditModal('programs')">✎ Edit Program</button>
+    <div class="section-inner">
+      <span class="eyebrow">Program Pendidikan</span>
+      <h2 class="section-title">Belajar Dharma untuk semua usia</h2>
+      <div class="program-grid" id="program-grid-preview"></div>
+    </div>
+  </section>
+
+  <!-- GALERI -->
+  <section class="editable">
+    <button class="edit-btn" onclick="openGalleryModal()">✎ Kelola Galeri</button>
+    <div class="section-inner">
+      <span class="eyebrow">Galeri</span>
+      <h2 class="section-title">Dokumentasi kegiatan</h2>
+      <div class="gallery-grid" id="gallery-grid-preview">
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 01</span></div>
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 02</span></div>
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 03</span></div>
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 04</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DONASI -->
+  <section class="donasi-section editable">
+    <button class="edit-btn" onclick="openEditModal('donasi')">✎ Edit Donasi</button>
+    <div class="section-inner">
+      <span class="eyebrow">Dukung Kami</span>
+      <h2 class="section-title">Setiap dana menumbuhkan kebajikan</h2>
+      <div class="donasi-grid">
+        <div class="donasi-card">
+          <h3>Transfer Dana Punia</h3>
+          <ul>
+            <li><span>Bank</span><span data-preview="donasi.bank_name"></span></li>
+            <li><span>No. Rekening</span><span data-preview="donasi.bank_account"></span></li>
+            <li><span>Atas Nama</span><span data-preview="donasi.bank_owner"></span></li>
+          </ul>
+        </div>
+        <div class="donasi-card" id="cara-preview">
+          <h3>Cara Lain Berkontribusi</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KONTAK -->
+  <footer class="editable">
+    <button class="edit-btn on-dark" onclick="openEditModal('kontak')" style="top:24px;">✎ Edit Kontak</button>
+    <div class="footer-grid">
+      <div>
+        <div class="brand-name" style="color:var(--white-soft)">Yayasan Kemakmuran</div>
+        <p id="footer-tagline-preview" style="margin-top:12px; max-width:260px;">Menebar Dharma, memupuk kebajikan.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Kontak</h4>
+        <a data-preview="kontak.whatsapp"></a>
+        <a data-preview="kontak.email"></a>
+        <p data-preview="kontak.alamat"></p>
+      </div>
+      <div class="footer-col">
+        <h4>Jelajahi</h4>
+        <a>Tentang Kami</a>
+        <a>Program</a>
+        <a>Dana Punia</a>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 Yayasan Kemakmuran.</div>
+  </footer>
+
+</div>
+
+<!-- ============ MODAL ============ -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h2 id="modal-title"></h2>
+    <div id="modal-body">
+      <div id="modal-fields"></div>
+      <div id="modal-list-section"></div>
+    </div>
+    <div class="modal-actions">
+      <span class="save-msg" id="save-msg">Tersimpan ✓</span>
+      <button class="btn-cancel" onclick="closeModal()">Batal</button>
+      <button class="btn-save" id="modal-save-btn" onclick="handleSave()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://tgpabahjuwdcorltmhll.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRncGFiYWhqdXdkY29ybHRtaGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMjQ5MDYsImV4cCI6MjEwMDkwMDkwNn0.woeNJzLhtIsCiArlAZVK6fRRwmEhpJMls20eyfNHJsc';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  let siteData = {};
+  let currentSection = null;
+
+  const SECTION_CONFIG = {
+    hero: {
+      title: 'Edit Hero',
+      fields: [
+        {key:'eyebrow', label:'Label kecil di atas judul', type:'text'},
+        {key:'title', label:'Judul Utama (dipakai juga di menu atas & footer — 1x edit, 3 tempat ikut berubah). Kata dalam [kurung siku] tampil emas. Contoh: Menebar [Dharma], Memupuk [Kebajikan]', type:'textarea'},
+        {key:'lead', label:'Kalimat pembuka', type:'textarea'},
+      ]
+    },
+    about: {
+      title: 'Edit Tentang Kami',
+      fields: [
+        {key:'paragraph1', label:'Paragraf 1', type:'textarea'},
+        {key:'paragraph2', label:'Paragraf 2', type:'textarea'},
+        {key:'paragraph3', label:'Paragraf 3', type:'textarea'},
+        {key:'legal_akta', label:'Akta Notaris', type:'text'},
+        {key:'legal_sk', label:'SK Kemenkumham', type:'text'},
+        {key:'legal_npwp', label:'NPWP Yayasan', type:'text'},
+        {key:'legal_alamat', label:'Alamat Vihara/Sekretariat', type:'text'},
+      ]
+    },
+    programs: {
+      title: 'Edit Program',
+      listKey: 'items',
+      listLabel: 'Kartu Program',
+      listItemName: 'Program',
+      itemFields: [
+        {key:'tag', label:'Label/Tag', type:'text'},
+        {key:'title', label:'Judul', type:'text'},
+        {key:'desc', label:'Deskripsi', type:'textarea'},
+        {key:'link', label:'Link tujuan (opsional — contoh: https://bimbelkemakmuran.com)', type:'text'},
+      ]
+    },
+    donasi: {
+      title: 'Edit Dana Punia / Donasi',
+      fields: [
+        {key:'bank_name', label:'Nama Bank', type:'text'},
+        {key:'bank_account', label:'No. Rekening', type:'text'},
+        {key:'bank_owner', label:'Atas Nama', type:'text'},
+      ],
+      listKey: 'cara',
+      listLabel: 'Cara Lain Berkontribusi',
+      listItemName: 'Cara',
+      itemFields: [
+        {key:'title', label:'Judul', type:'text'},
+        {key:'desc', label:'Deskripsi', type:'textarea'},
+      ]
+    },
+    kontak: {
+      title: 'Edit Kontak',
+      fields: [
+        {key:'whatsapp', label:'WhatsApp (teks tampil, contoh: WhatsApp: 08xx-xxxx-xxxx)', type:'text'},
+        {key:'email', label:'Email (teks tampil, contoh: Email: info@...)', type:'text'},
+        {key:'alamat', label:'Alamat', type:'textarea'},
+      ]
+    }
+  };
+
+  // ---------- Auth ----------
+  async function checkSession(){
+    const { data:{ session } } = await sb.auth.getSession();
+    if (session) await showSite(session.user);
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorMsg = document.getElementById('error-msg');
+    errorMsg.style.display = 'none';
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error){
+      errorMsg.textContent = 'Login gagal: ' + error.message;
+      errorMsg.style.display = 'block';
+      return;
+    }
+    await showSite(data.user);
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    location.reload();
+  });
+
+  async function showSite(user){
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).maybeSingle();
+
+    if (!profile || profile.role !== 'admin'){
+      document.getElementById('login-view').innerHTML = `
+        <h1>Bukan Akun Admin</h1>
+        <p class="sub">Akun ini tidak punya akses ke Panel Admin website. Kalau kamu pengurus SMB, buka halaman khusus SMB.</p>
+        <a href="smb.html" class="btn-primary" style="display:block; text-align:center; text-decoration:none;">Buka Halaman SMB</a>
+      `;
+      await sb.auth.signOut();
+      return;
+    }
+
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('site-view').style.display = 'block';
+    document.getElementById('admin-email').textContent = user.email;
+    await loadAllContent();
+  }
+
+  // ---------- Load & render preview ----------
+  let galleryData = [];
+
+  async function loadAllContent(){
+    const { data, error } = await sb.from('site_content').select('section, data');
+    if (error){ alert('Gagal memuat data: ' + error.message); return; }
+    data.forEach(row => siteData[row.section] = row.data);
+
+    const { data: gdata, error: gerror } = await sb.from('site_gallery').select('*').order('created_at', { ascending:false });
+    if (!gerror) galleryData = gdata || [];
+
+    renderPreview();
+  }
+
+  function renderGalleryGrid(){
+    const grid = document.getElementById('gallery-grid-preview');
+    if (!galleryData.length){
+      grid.innerHTML = `
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 01</span></div>
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 02</span></div>
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 03</span></div>
+        <div class="gallery-tile"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15" stroke="#5C2323" stroke-width="1.4" fill="none"/></svg><span>Kegiatan 04</span></div>
+      `;
+      return;
+    }
+    grid.innerHTML = galleryData.map(g => `
+      <div class="gallery-tile">
+        <img src="${g.image_url}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        ${g.caption ? `<span style="background:rgba(43,26,20,0.65); color:#fff; padding:2px 8px; border-radius:3px; z-index:1;">${escapeHtml(g.caption)}</span>` : ''}
+      </div>
+    `).join('');
+  }
+
+  function renderPreview(){
+    renderGalleryGrid();
+    document.querySelectorAll('[data-preview]').forEach(el => {
+      const [section, key] = el.getAttribute('data-preview').split('.');
+      el.textContent = (siteData[section] && siteData[section][key]) || '';
+    });
+
+    const heroTitleEl = document.getElementById('hero-title-preview');
+    const heroRaw = (siteData.hero && siteData.hero.title) || '';
+    heroTitleEl.innerHTML = parseHeroTitle(heroRaw);
+    document.getElementById('nav-tagline-preview').textContent = heroRaw ? taglineForNav(heroRaw) : 'Menebar Dharma · Memupuk Kebajikan';
+    document.getElementById('footer-tagline-preview').textContent = heroRaw ? taglineForFooter(heroRaw) : 'Menebar Dharma, memupuk kebajikan — bersama umat dan masyarakat.';
+
+    const progGrid = document.getElementById('program-grid-preview');
+    const items = (siteData.programs && siteData.programs.items) || [];
+    progGrid.innerHTML = items.map(i => `
+      <div class="program-card">
+        <span class="tag">${escapeHtml(i.tag)}</span>
+        <h3>${escapeHtml(i.title)}</h3>
+        <p>${escapeHtml(i.desc)}</p>
+      </div>`).join('');
+
+    const caraBox = document.getElementById('cara-preview');
+    const cara = (siteData.donasi && siteData.donasi.cara) || [];
+    caraBox.innerHTML = '<h3>Cara Lain Berkontribusi</h3>' + cara.map(c => `
+      <a class="cara"><b>${escapeHtml(c.title)}</b>${escapeHtml(c.desc)}</a>`).join('');
+
+    const pengurusData = siteData.pengurus || {};
+    document.getElementById('pengurus-grid-preview').innerHTML =
+      renderPengurusCard('Susunan Pengurus Yayasan', pengurusData.yayasan) +
+      renderPengurusCard('Susunan Pengurus Vihara', pengurusData.vihara) +
+      renderPengurusCard('Susunan Pengurus SMB & FDY', pengurusData.smb_fdy);
+
+    // Logo: pakai gambar upload kalau ada, kalau tidak pakai ikon default
+    const logoUrl = siteData.brand && siteData.brand.logo_url;
+    const iconEl = document.getElementById('brand-logo-icon');
+    const imgEl = document.getElementById('brand-logo-img');
+    if (logoUrl){
+      imgEl.src = logoUrl;
+      imgEl.style.display = 'block';
+      iconEl.style.display = 'none';
+    } else {
+      imgEl.style.display = 'none';
+      iconEl.style.display = 'block';
+    }
+  }
+
+  function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str||''; return d.innerHTML; }
+
+  // Sama seperti di index.html: [kata] -> <em>, baris dipecah setelah koma pertama
+  function parseHeroTitle(text){
+    let out = escapeHtml(text);
+    const commaIdx = out.indexOf(',');
+    if (commaIdx !== -1){
+      out = out.slice(0, commaIdx + 1) + '<br>' + out.slice(commaIdx + 1).trim();
+    }
+    out = out.replace(/\[(.+?)\]/g, '<em>$1</em>');
+    return out;
+  }
+
+  function stripBrackets(text){ return text.replace(/[\[\]]/g, ''); }
+
+  function taglineForNav(text){
+    return stripBrackets(text).replace(/,\s*/, ' \u00B7 ');
+  }
+
+  function taglineForFooter(text){
+    let out = stripBrackets(text);
+    out = out.replace(/,\s*([A-ZÀ-Ý])/, (m, p1) => ', ' + p1.toLowerCase());
+    return out + ' — bersama umat dan masyarakat.';
+  }
+
+  // ---------- Modal ----------
+  function fieldId(section, key, index){
+    return index == null ? `f_${section}_${key}` : `f_${section}_item_${index}_${key}`;
+  }
+
+  function fieldHtml(section, f, value, index){
+    const id = fieldId(section, f.key, index);
+    const val = (value||'').toString().replace(/"/g,'&quot;');
+    if (f.type === 'textarea'){
+      return `<label for="${id}">${f.label}</label><textarea id="${id}">${escapeHtml(value)}</textarea>`;
+    }
+    return `<label for="${id}">${f.label}</label><input id="${id}" value="${val}">`;
+  }
+
+  let modalListItems = []; // working copy of the list being edited (allows add/remove before saving)
+
+  function openEditModal(section){
+    const cfg = SECTION_CONFIG[section];
+    currentSection = section;
+    document.getElementById('modal-title').textContent = cfg.title;
+    const data = siteData[section] || {};
+
+    // Top-level fields (static, not affected by add/remove)
+    document.getElementById('modal-fields').innerHTML = cfg.fields
+      ? cfg.fields.map(f => fieldHtml(section, f, data[f.key])).join('')
+      : '';
+
+    // List section (dynamic add/remove)
+    if (cfg.listKey){
+      modalListItems = JSON.parse(JSON.stringify(data[cfg.listKey] || []));
+      renderModalList();
+    } else {
+      document.getElementById('modal-list-section').innerHTML = '';
+    }
+
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function renderModalList(){
+    const cfg = SECTION_CONFIG[currentSection];
+    if (!cfg.listKey) return;
+    const itemsHtml = modalListItems.map((item, i) => `
+      <div class="list-item">
+        <div class="list-item-row">
+          <span class="list-item-label">Item ${i+1}</span>
+          <button type="button" class="btn-remove" onclick="removeModalItem(${i})">Hapus</button>
+        </div>
+        ${cfg.itemFields.map(f => fieldHtml(currentSection, f, item[f.key], i)).join('')}
+      </div>`).join('');
+
+    document.getElementById('modal-list-section').innerHTML = `
+      <div class="modal-subhead">${cfg.listLabel}</div>
+      ${itemsHtml}
+      <button type="button" class="btn-add-item" onclick="addModalItem()">+ Tambah ${cfg.listKey === 'items' ? 'Program' : 'Item'}</button>
+    `;
+  }
+
+  function syncModalListFromDOM(){
+    const cfg = SECTION_CONFIG[currentSection];
+    if (!cfg.listKey) return;
+    modalListItems = modalListItems.map((item, i) => {
+      const obj = {};
+      cfg.itemFields.forEach(f => {
+        const el = document.getElementById(fieldId(currentSection, f.key, i));
+        obj[f.key] = el ? el.value : (item[f.key] || '');
+      });
+      return obj;
+    });
+  }
+
+  function addModalItem(){
+    syncModalListFromDOM();
+    const cfg = SECTION_CONFIG[currentSection];
+    const blank = {};
+    cfg.itemFields.forEach(f => blank[f.key] = '');
+    modalListItems.push(blank);
+    renderModalList();
+  }
+
+  function removeModalItem(index){
+    syncModalListFromDOM();
+    modalListItems.splice(index, 1);
+    renderModalList();
+  }
+
+  async function handleSave(){
+    if (currentSection === 'brand'){
+      await saveLogo();
+    } else if (currentSection === 'pengurus'){
+      await savePengurus();
+    } else {
+      await saveModal();
+    }
+  }
+
+  // =====================================================
+  // GALERI: upload & hapus foto
+  // =====================================================
+  function openGalleryModal(){
+    document.getElementById('modal-title').textContent = 'Kelola Galeri';
+    renderGalleryModalBody();
+    const saveBtn = document.getElementById('modal-save-btn');
+    saveBtn.textContent = 'Selesai';
+    saveBtn.onclick = closeModal;
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function renderGalleryModalBody(){
+    document.getElementById('modal-fields').innerHTML = `
+      <label>Upload Foto Baru</label>
+      <input type="file" id="gallery-file-input" accept="image/png,image/jpeg,image/webp">
+      <label>Keterangan (opsional)</label>
+      <input id="gallery-caption-input" placeholder="misal: Kegiatan SMB Agustus 2026">
+      <p style="font-size:0.72rem; color:#8A7F63; margin-top:6px; font-style:italic;">Maks 2MB per foto.</p>
+      <button type="button" class="btn-add" style="margin-top:12px;" onclick="uploadGalleryPhoto()">+ Upload Foto</button>
+    `;
+    document.getElementById('modal-list-section').innerHTML = `
+      <div class="modal-subhead">Foto Tersimpan (${galleryData.length})</div>
+      ${galleryData.length ? `<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:14px;">
+        ${galleryData.map(g => `
+          <div style="border:1px solid var(--line); border-radius:6px; overflow:hidden;">
+            <img src="${g.image_url}" style="width:100%; height:110px; object-fit:cover; display:block;">
+            <div style="padding:8px 10px;">
+              <div style="font-size:0.76rem; color:var(--ink); margin-bottom:6px; min-height:1.2em;">${escapeHtml(g.caption || '')}</div>
+              <button type="button" class="btn-remove" onclick="deleteGalleryPhoto(${g.id})">✕ Hapus</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>` : '<p class="empty-note" style="margin-top:10px;">Belum ada foto.</p>'}
+    `;
+  }
+
+  async function uploadGalleryPhoto(){
+    const fileInput = document.getElementById('gallery-file-input');
+    const file = fileInput.files[0];
+    if (!file){ alert('Pilih file dulu.'); return; }
+    if (file.size > 2 * 1024 * 1024){ alert('Ukuran file terlalu besar. Maksimal 2MB.'); return; }
+    const caption = document.getElementById('gallery-caption-input').value;
+    const ext = file.name.split('.').pop();
+    const path = `gallery/${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await sb.storage.from('assets').upload(path, file, { upsert: true });
+    if (uploadError){ alert('Gagal upload: ' + uploadError.message); return; }
+    const { data: urlData } = sb.storage.from('assets').getPublicUrl(path);
+
+    const { error } = await sb.from('site_gallery').insert({ image_url: urlData.publicUrl, caption });
+    if (error){ alert('Gagal menyimpan: ' + error.message); return; }
+
+    const { data: gdata } = await sb.from('site_gallery').select('*').order('created_at', { ascending:false });
+    galleryData = gdata || [];
+    renderGalleryModalBody();
+    renderGalleryGrid();
+  }
+
+  async function deleteGalleryPhoto(id){
+    if (!confirm('Hapus foto ini?')) return;
+    const { error } = await sb.from('site_gallery').delete().eq('id', id);
+    if (error){ alert('Gagal menghapus: ' + error.message); return; }
+    const { data: gdata } = await sb.from('site_gallery').select('*').order('created_at', { ascending:false });
+    galleryData = gdata || [];
+    renderGalleryModalBody();
+    renderGalleryGrid();
+  }
+
+  // =====================================================
+  // SUSUNAN PENGURUS (3 grup, masing-masing bisa tambah/hapus anggota)
+  // =====================================================
+  const PENGURUS_GROUP_LABELS = {
+    yayasan: 'Susunan Pengurus Yayasan',
+    vihara: 'Susunan Pengurus Vihara',
+    smb_fdy: 'Susunan Pengurus SMB & FDY',
+  };
+  let pengurusGroups = { yayasan: [], vihara: [], smb_fdy: [] };
+
+  function renderPengurusCard(title, members){
+    const rows = (members || []).map(m => `
+      <div class="pengurus-row"><span class="pengurus-jabatan">${escapeHtml(m.jabatan)}</span><span class="pengurus-nama">${escapeHtml(m.nama) || '—'}</span></div>
+    `).join('') || '<p style="font-size:0.8rem; color:#8A7F63; font-style:italic;">Belum ada data.</p>';
+    return `<div class="pengurus-card"><h3>${title}</h3>${rows}</div>`;
+  }
+
+  function openPengurusModal(){
+    currentSection = 'pengurus';
+    document.getElementById('modal-title').textContent = 'Edit Susunan Pengurus';
+    const data = siteData.pengurus || {};
+    pengurusGroups = {
+      yayasan: JSON.parse(JSON.stringify(data.yayasan || [])),
+      vihara: JSON.parse(JSON.stringify(data.vihara || [])),
+      smb_fdy: JSON.parse(JSON.stringify(data.smb_fdy || [])),
+    };
+    document.getElementById('modal-fields').innerHTML = '';
+    renderPengurusModalBody();
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function renderPengurusModalBody(){
+    let html = '';
+    Object.keys(PENGURUS_GROUP_LABELS).forEach(key => {
+      html += `<div class="modal-subhead">${PENGURUS_GROUP_LABELS[key]}</div>`;
+      html += pengurusGroups[key].map((m, i) => `
+        <div class="list-item">
+          <div class="list-item-row">
+            <div class="list-item-label">Anggota ${i+1}</div>
+            <button type="button" class="btn-remove" onclick="removePengurusItem('${key}', ${i})">✕ Hapus</button>
+          </div>
+          <label>Jabatan</label>
+          <input id="peng_${key}_${i}_jabatan" value="${escapeHtml(m.jabatan).replace(/"/g,'&quot;')}">
+          <label>Nama</label>
+          <input id="peng_${key}_${i}_nama" value="${escapeHtml(m.nama).replace(/"/g,'&quot;')}">
+        </div>
+      `).join('');
+      html += `<button type="button" class="btn-add" onclick="addPengurusItem('${key}')">+ Tambah Anggota — ${PENGURUS_GROUP_LABELS[key]}</button>`;
+    });
+    document.getElementById('modal-list-section').innerHTML = html;
+  }
+
+  function syncPengurusFromDom(){
+    Object.keys(pengurusGroups).forEach(key => {
+      pengurusGroups[key].forEach((m, i) => {
+        const jEl = document.getElementById(`peng_${key}_${i}_jabatan`);
+        const nEl = document.getElementById(`peng_${key}_${i}_nama`);
+        if (jEl) m.jabatan = jEl.value;
+        if (nEl) m.nama = nEl.value;
+      });
+    });
+  }
+
+  function addPengurusItem(key){
+    syncPengurusFromDom();
+    pengurusGroups[key].push({ jabatan: '', nama: '' });
+    renderPengurusModalBody();
+  }
+
+  function removePengurusItem(key, index){
+    syncPengurusFromDom();
+    pengurusGroups[key].splice(index, 1);
+    renderPengurusModalBody();
+  }
+
+  async function savePengurus(){
+    syncPengurusFromDom();
+    const payload = {
+      yayasan: pengurusGroups.yayasan,
+      vihara: pengurusGroups.vihara,
+      smb_fdy: pengurusGroups.smb_fdy,
+    };
+    const { error } = await sb.from('site_content').update({ data: payload }).eq('section', 'pengurus');
+    if (error){
+      alert('Gagal menyimpan: ' + error.message);
+      return;
+    }
+    siteData.pengurus = payload;
+    renderPreview();
+    const msg = document.getElementById('save-msg');
+    msg.classList.add('show');
+    setTimeout(() => { msg.classList.remove('show'); closeModal(); }, 700);
+  }
+
+  function openLogoModal(){
+    currentSection = 'brand';
+    document.getElementById('modal-title').textContent = 'Edit Logo';
+    const current = (siteData.brand && siteData.brand.logo_url) || '';
+    document.getElementById('modal-fields').innerHTML = `
+      <div style="margin-bottom:18px;">
+        <label style="margin-top:0;">Logo saat ini</label>
+        <div style="width:84px; height:84px; border:1px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; background:#fff; overflow:hidden;">
+          ${current ? `<img src="${current}" style="max-width:100%; max-height:100%; object-fit:contain;">` : '<span style="font-size:0.68rem; color:#8A7F63; text-align:center; padding:8px;">Ikon default</span>'}
+        </div>
+      </div>
+      <label>Upload logo baru</label>
+      <input type="file" id="logo-file-input" accept="image/png,image/jpeg,image/svg+xml,image/webp">
+      <p style="font-size:0.72rem; color:#8A7F63; margin-top:6px; font-style:italic;">Disarankan gambar persegi (contoh 512×512px), format PNG/SVG dengan latar transparan, maks 1MB.</p>
+      ${current ? '<button type="button" class="btn-remove" style="margin-top:14px; display:block;" onclick="removeLogo()">✕ Hapus logo, pakai ikon default lagi</button>' : ''}
+    `;
+    document.getElementById('modal-list-section').innerHTML = '';
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  async function saveLogo(){
+    const fileInput = document.getElementById('logo-file-input');
+    const file = fileInput && fileInput.files[0];
+    if (!file){
+      closeModal();
+      return;
+    }
+    if (file.size > 1024 * 1024){
+      alert('Ukuran file terlalu besar. Maksimal 1MB.');
+      return;
+    }
+    const ext = file.name.split('.').pop();
+    const path = `logo-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await sb.storage.from('assets').upload(path, file, { upsert: true });
+    if (uploadError){
+      alert('Gagal upload logo: ' + uploadError.message);
+      return;
+    }
+    const { data: urlData } = sb.storage.from('assets').getPublicUrl(path);
+
+    const { error } = await sb.from('site_content')
+      .upsert({ section: 'brand', data: { logo_url: urlData.publicUrl } }, { onConflict: 'section' });
+    if (error){
+      alert('Gagal menyimpan logo: ' + error.message);
+      return;
+    }
+
+    siteData.brand = { logo_url: urlData.publicUrl };
+    renderPreview();
+    const msg = document.getElementById('save-msg');
+    msg.classList.add('show');
+    setTimeout(() => { msg.classList.remove('show'); closeModal(); }, 700);
+  }
+
+  async function removeLogo(){
+    const { error } = await sb.from('site_content')
+      .upsert({ section: 'brand', data: { logo_url: '' } }, { onConflict: 'section' });
+    if (error){
+      alert('Gagal menghapus logo: ' + error.message);
+      return;
+    }
+    siteData.brand = { logo_url: '' };
+    renderPreview();
+    closeModal();
+  }
+
+  function closeModal(){
+    document.getElementById('modal-overlay').classList.remove('open');
+    const saveBtn = document.getElementById('modal-save-btn');
+    saveBtn.textContent = 'Simpan';
+    saveBtn.onclick = handleSave;
+  }
+
+  async function saveModal(){
+    const section = currentSection;
+    const cfg = SECTION_CONFIG[section];
+    let payload = {};
+
+    if (cfg.fields){
+      cfg.fields.forEach(f => {
+        payload[f.key] = document.getElementById(fieldId(section, f.key)).value;
+      });
+    }
+    if (cfg.listKey){
+      syncModalListFromDOM();
+      payload[cfg.listKey] = modalListItems;
+    }
+
+    const { error } = await sb.from('site_content').update({ data: payload }).eq('section', section);
+    if (error){
+      alert('Gagal menyimpan: ' + error.message);
+      return;
+    }
+    siteData[section] = payload;
+    renderPreview();
+
+    const msg = document.getElementById('save-msg');
+    msg.classList.add('show');
+    setTimeout(() => { msg.classList.remove('show'); closeModal(); }, 700);
+  }
+
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-overlay') closeModal();
+  });
+
+  checkSession();
+</script>
+
+</body>
+</html>
