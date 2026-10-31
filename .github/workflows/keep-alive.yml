@@ -3,17 +3,35 @@ name: Supabase Keep Alive
 on:
   schedule:
     # Jalan tiap Senin & Kamis jam 03:00 UTC (~10:00 WIB)
-    # Cukup buat jaga-jaga di bawah batas 7 hari nggak aktif dari Supabase
     - cron: '0 3 * * 1,4'
   workflow_dispatch: {}   # supaya bisa dites manual lewat tombol "Run workflow" di tab Actions
+
+permissions:
+  contents: write   # perlu ini biar workflow boleh commit & push balik ke repo
 
 jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Ping Supabase (baca 1 baris kecil dari database)
         run: |
           curl -s -o /dev/null -w "HTTP status: %{http_code}\n" \
             "https://tgpabahjuwdcorltmhll.supabase.co/rest/v1/site_content?select=section&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+
+      - name: Catat waktu ping terakhir
+        run: |
+          mkdir -p .keepalive
+          echo "Last ping: $(date -u +'%Y-%m-%d %H:%M UTC')" > .keepalive/last-ping.txt
+
+      - name: Commit & push (biar GitHub nganggep repo aktif, nggak auto-disable workflow)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .keepalive/last-ping.txt
+          git diff --staged --quiet || git commit -m "chore: keep-alive ping $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
