@@ -2,8 +2,10 @@ name: Supabase Keep Alive
 
 on:
   schedule:
-    # Jalan tiap Senin & Kamis jam 03:00 UTC (~10:00 WIB)
-    - cron: '0 3 * * 1,4'
+    # Jalan tiap hari jam 03:00 UTC (~10:00 WIB)
+    # biar kalau ada 1-2 hari run-nya ke-skip sama GitHub, masih jauh di bawah
+    # batas 7 hari sebelum Supabase auto-pause project
+    - cron: '0 3 * * *'
   workflow_dispatch: {}   # supaya bisa dites manual lewat tombol "Run workflow" di tab Actions
 
 permissions:
